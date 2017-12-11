@@ -10,8 +10,6 @@ def read_input(filename):
 			if not c:
 				if first == last:
 					result += int(last)
-				print("f: %s" % first)
-				print("l: %s" % last)
 				print("EOF")
 				break
 
@@ -20,12 +18,11 @@ def read_input(filename):
 
 			if c == last:
 				result += int(c)
-				print("Result: %i" % result)
 
 			if c.isdigit():
 				last = c
 
-			print("Read a character: %c" % c)
+			# print("Read a character: %c" % c)
 	return result
 
 if __name__ == '__main__':
