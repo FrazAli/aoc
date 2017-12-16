@@ -18,22 +18,27 @@ def read_input(filename):
                 print("EOF")
                 break
 
-            print("Read a line: %s" % line)
+            # print("Read a line: %s" % line)
             data.update(parse_line(line))
             
     return data
 
 def search_programs(data, p):
-    pgms = []
-    for k, v in data.items():
-        if p in v:
-            pgms.append(k)
+    global count
+    global pgms
+    if p not in pgms:
+        count += 1
+        pgms.append(p)
+    else:
+        return
 
-    print pgms
-    return len(pgms)
+    for i in data[p]:
+        search_programs(data, i)
 
 if __name__ == '__main__':
+    count = 0
+    pgms = []
     d = read_input("p1-input.txt")
-    r = search_programs(d, 0)
-    print("Result: %i" % r)
-    print(d)
+    search_programs(d, 0)
+    print pgms
+    print("Result: %i" % count)
