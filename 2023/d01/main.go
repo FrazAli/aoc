@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/FrazAli/aoc/2023/utils"
 )
 
 /* getKeys returns the keys of a map */
@@ -19,25 +19,6 @@ func getKeys(myMap map[string]int) []string {
 	}
 
 	return keys
-}
-
-/*
-readLines reads a whole file into memory
-and returns a slice of its lines.
-*/
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, scanner.Err()
 }
 
 func part1(input []string) uint64 {
@@ -133,14 +114,14 @@ func main() {
 			"7pqrstsixteen",
 		}
 	*/
-	input1, err := readLines("input1.txt")
+	input1, err := utils.ReadLines("input1.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Println("Part1: ", part1(input1))
 
-	input2, err := readLines("input2.txt")
+	input2, err := utils.ReadLines("input2.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
