@@ -27,14 +27,14 @@ type instruction struct {
 }
 
 // directions when starting at (0,0) from top left
-var directions = map[string]direction{
+var directionsNum = map[string]direction{
 	"0": {1, 0},
 	"1": {0, 1},
 	"2": {-1, 0},
 	"3": {0, -1},
 }
 
-var directionsNum = map[string]direction{
+var directions = map[string]direction{
 	"R": {1, 0},
 	"L": {-1, 0},
 	"U": {0, -1},
@@ -69,7 +69,7 @@ func part2(input []string) {
 		dist, _ := strconv.ParseInt(distDir[0:5], 16, 64) // e.g. 1f1f1 i.e. 127473
 		// fmt.Println(dir, dist, color)
 		// collect instructions i.e. direction and distance
-		instructions = append(instructions, instruction{directions[dir], int(dist)})
+		instructions = append(instructions, instruction{directionsNum[dir], int(dist)})
 	}
 
 	fmt.Println("Part2: ", dig(instructions))
