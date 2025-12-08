@@ -40,65 +40,86 @@ fn distance_squared(a: &Point, b: &Point) -> i128 {
     dx * dx + dy * dy + dz * dz
 }
 
-fn solve_part1(points: &[Point], max_connections: usize) -> usize {
-    if points.len() < 3 {
-        return 0;
-    }
-
-    /* Pre-allocate and build all point connections with squared distance.
-    Unique pairs for n points: n*(n-1)/2 */
-    let mut connections = Vec::with_capacity(points.len() * (points.len() - 1) / 2);
+/* Pre-allocate and build all pairwise edges with squared distance.
+Unique pairs (max pairs) for n points: n*(n-1)/2. */
+fn build_edges(points: &[Point]) -> Vec<(i128, usize, usize)> {
+    let mut edges = Vec::with_capacity(points.len() * (points.len() - 1) / 2);
     for i in 0..points.len() {
         for j in (i + 1)..points.len() {
-            connections.push((distance_squared(&points[i], &points[j]), i, j));
+            edges.push((distance_squared(&points[i], &points[j]), i, j));
         }
     }
 
-    connections.sort_by(|a, b| a.0.cmp(&b.0));
+    edges.sort_by(|a, b| a.0.cmp(&b.0));
+    edges
+}
 
-    let mut circuits: Vec<HashSet<usize>> = (0..points.len())
+fn new_circuits(n: usize) -> Vec<HashSet<usize>> {
+    (0..n)
         .map(|i| {
             let mut set = HashSet::new();
             set.insert(i);
             set
         })
-        .collect();
+        .collect()
+}
 
-    for &(_, a, b) in connections.iter().take(max_connections) {
-        let mut idx_a = None;
-        let mut idx_b = None;
-        for (ci, set) in circuits.iter().enumerate() {
-            if idx_a.is_none() && set.contains(&a) {
-                idx_a = Some(ci);
-            }
-            if idx_b.is_none() && set.contains(&b) {
-                idx_b = Some(ci);
-            }
-            if idx_a.is_some() && idx_b.is_some() {
-                break;
-            }
+fn merge_circuits(circuits: &mut Vec<HashSet<usize>>, a: usize, b: usize) {
+    let mut idx_a = None;
+    let mut idx_b = None;
+    for (ci, set) in circuits.iter().enumerate() {
+        if idx_a.is_none() && set.contains(&a) {
+            idx_a = Some(ci);
         }
 
-        let ci = idx_a.expect("component for a not found");
-        let cj = idx_b.expect("component for b not found");
-        if ci == cj {
-            continue; // already connected
+        if idx_b.is_none() && set.contains(&b) {
+            idx_b = Some(ci);
         }
 
-        // Merge smaller into larger to keep merge cost lower.
-        let (mut large, mut small) = if circuits[ci].len() >= circuits[cj].len() {
-            (ci, cj)
-        } else {
-            (cj, ci)
-        };
-
-        if small > large {
-            std::mem::swap(&mut small, &mut large);
+        if idx_a.is_some() && idx_b.is_some() {
+            break;
         }
+    }
 
-        let to_merge = circuits[small].clone();
-        circuits[large].extend(to_merge);
-        circuits.swap_remove(small);
+    let ci = match idx_a {
+        Some(v) => v,
+        None => return,
+    };
+    let cj = match idx_b {
+        Some(v) => v,
+        None => return,
+    };
+
+    if ci == cj {
+        return;
+    }
+
+    // Merge smaller into larger to keep merge cost lower.
+    let (mut large, mut small) = if circuits[ci].len() >= circuits[cj].len() {
+        (ci, cj)
+    } else {
+        (cj, ci)
+    };
+
+    if small > large {
+        std::mem::swap(&mut small, &mut large);
+    }
+
+    let to_merge = circuits[small].clone();
+    circuits[large].extend(to_merge);
+    circuits.swap_remove(small);
+}
+
+fn solve_part1(points: &[Point], max_connections: usize) -> usize {
+    if points.len() < 3 {
+        return 0;
+    }
+
+    let edges = build_edges(points);
+    let mut circuits = new_circuits(points.len());
+
+    for &(_, a, b) in edges.iter().take(max_connections) {
+        merge_circuits(&mut circuits, a, b);
     }
 
     let mut sizes: Vec<usize> = circuits.iter().map(|c| c.len()).collect();
@@ -108,12 +129,34 @@ fn solve_part1(points: &[Point], max_connections: usize) -> usize {
     sizes[0] * sizes[1] * sizes[2]
 }
 
+fn solve_part2(points: &[Point]) -> i64 {
+    if points.len() < 2 {
+        return 0;
+    }
+
+    let edges = build_edges(points);
+    let mut circuits = new_circuits(points.len());
+
+    for &(_, a, b) in &edges {
+        let before = circuits.len();
+        merge_circuits(&mut circuits, a, b);
+        if circuits.len() == 1 && before != 1 {
+            return points[a].x * points[b].x;
+        }
+    }
+
+    0
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input = Input::from_default()?;
     let points = parse(&input.raw)?;
 
     let part1 = solve_part1(&points, 1000);
     println!("Part 1: {part1}");
+
+    let part2 = solve_part2(&points);
+    println!("Part 2: {part2}");
 
     Ok(())
 }
@@ -150,7 +193,11 @@ mod tests {
             Ok(p) => p,
             Err(e) => panic!("failed to parse example: {e}"),
         };
-        let result = solve_part1(&points, 10);
-        assert_eq!(result, 40);
+
+        let result1 = solve_part1(&points, 10);
+        assert_eq!(result1, 40);
+
+        let result2 = solve_part2(&points);
+        assert_eq!(result2, 25272);
     }
 }
