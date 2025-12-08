@@ -45,11 +45,11 @@ fn merge_ranges(mut ranges: Vec<(i64, i64)>) -> Vec<(i64, i64)> {
 
     let mut merged: Vec<(i64, i64)> = Vec::new();
     for (start, end) in ranges {
-        if let Some((_, last_end)) = merged.last_mut() {
-            if start <= *last_end + 1 {
-                *last_end = (*last_end).max(end);
-                continue;
-            }
+        if let Some((_, last_end)) = merged.last_mut()
+            && start <= *last_end + 1
+        {
+            *last_end = (*last_end).max(end);
+            continue;
         }
         merged.push((start, end));
     }

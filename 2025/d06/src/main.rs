@@ -89,8 +89,8 @@ fn eval_part2(problem: &[&str]) -> Result<i64, Box<dyn std::error::Error>> {
     let mut operands: Vec<i64> = Vec::new();
     for c in 0..width {
         let mut digits = String::new();
-        for r in 0..op_row {
-            let ch = problem[r].as_bytes()[c] as char;
+        for row in problem.iter().take(op_row) {
+            let ch = row.as_bytes()[c] as char;
             if ch != ' ' {
                 digits.push(ch);
             }

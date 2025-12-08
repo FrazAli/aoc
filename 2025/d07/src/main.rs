@@ -9,19 +9,18 @@ fn find_start(lines: &[Vec<char>]) -> Option<(usize, usize)> {
 
 fn count_splits(grid: &[Vec<char>], start: (usize, usize)) -> usize {
     let width = grid[0].len();
-    let height = grid.len();
     let mut current = vec![false; width];
     let mut next = vec![false; width];
     current[start.1] = true;
 
     let mut splits = 0;
-    for r in start.0..height {
+    for row in grid.iter().skip(start.0) {
         for c in 0..width {
             if !current[c] {
                 continue;
             }
 
-            match grid[r][c] {
+            match row[c] {
                 '^' => {
                     splits += 1;
                     if c > 0 {
@@ -53,21 +52,20 @@ fn count_splits(grid: &[Vec<char>], start: (usize, usize)) -> usize {
 
 fn count_timelines(grid: &[Vec<char>], start: (usize, usize)) -> u128 {
     let width = grid[0].len();
-    let height = grid.len();
     let mut current = vec![0u128; width];
     let mut next = vec![0u128; width];
     current[start.1] = 1;
 
     let mut exits: u128 = 0;
 
-    for r in start.0..height {
+    for row in grid.iter().skip(start.0) {
         for c in 0..width {
             let branches = current[c];
             if branches == 0 {
                 continue;
             }
 
-            match grid[r][c] {
+            match row[c] {
                 '^' => {
                     if c > 0 {
                         next[c - 1] = next[c - 1].saturating_add(branches);
