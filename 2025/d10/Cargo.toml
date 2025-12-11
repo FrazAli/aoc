@@ -1,0 +1,8 @@
+[package]
+name = "d10"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+common = { path = "../common" }
+z3 = { version = "0.19.5", features = ["static-link-z3"] }
